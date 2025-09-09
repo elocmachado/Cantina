@@ -1,0 +1,92 @@
+document.addEventListener('DOMContentLoaded', () => {
+    //LÓGICA PARA PAGAMENTO DOS PRODUTOS---
+    //Selecionar todos os botões com a classe 'add-to-cart-btn'
+    const addToCartButtons = document.querySelectorAll('.add-to-cart');
+    //Intera sobre cada botão encontrado, 'forEach' é um laço de repetição
+    addToCartButtons.forEach(button => {
+        button.addEventListener('click', () => {
+        //Adiciona um 'ouvinte' de evento de clique para cada botão
+        //Quando clicado, o botão executa a função 'addeventListener'c
+            const card = button.closest('.card');//button.closest encontra um elemento pai
+            const productName = card.getAttribute('data-name');//pega o nome do produto através do atributo data-name
+            const productPrice = parseFloat(card.getAttribute('data-price'));//pega o preço do produto e converte em número decimal
+
+            const product = { //cria um objeto "product" para aarmazenar as informações do item
+                name: productName,
+                price: productPrice,
+            };
+            //vamos pegar o carrinho atual do "localStage" do navegador,
+            //json.parse converte a string  do localStage em um objeto para JavaScript
+            //se não houver nada no carrinho, ele inicializa como um array vazio
+
+            let cart = JSON.parse(localStorage.getItem('cart')) || [];
+            cart.push(product) //adiciona um produto novo ao carrinho
+            
+            //vamos salvar o array no carrinho atualizado
+            //'JSON;stringify' converte o objeto/array em String para armazenar
+            localStorage.setItem('cart', JSON.stringify(cart));
+
+            //agora vamos adicionar um alerta simples
+            alert(`${productName} foi adicionado ao carrinho!`)
+        })
+    })
+
+    //LÓGICA PARA A PÁGINA DE CARRINHO---
+
+    //Criando as variáveis para selecionar os elementos
+
+    const cardItensContainer = document.getElementById('card-itens-container');
+    const cardTotalValue = document.getElementById('card-total-value');
+    const checkoutBtn = document.getElementById('checkout-btn');
+
+    //Verifica se estamos na página do carrinho
+    if (cardItensContainer){
+        //Pega os itens do localStorage
+        const cart = JSON.parse(localStorage.getItem('cart')) || [];
+        let total = 0;
+        
+        if (cart.length == 0){
+            //se o carrinho estiver vazio, exibe a mensagem do html
+        }else{
+            //mas se houver itens, limpa o conteúdo padrão
+            cardItensContainer.innerHTML = '';
+            //Vamos descobrir os itens
+            cart.forEach(product => { 
+                const cartItem = document.createElement('div');
+                cartItem.classList.add('cart-item');//adiciona a classe 'cart-item' ao div
+                //Definimos o conteúdo HTML
+                //to.fixed formata para ter duas casas decimais
+                cartItem.innerHTML = `
+                <span>${product.name}</span>
+                <span>R$ ${product.price.toFixed(2)}</span>
+            `;
+                //Vai adicionar uma nova div
+                cardItensContainer.appendChild(cartItem);
+                //Soma o preço de cada produto
+                total += product.price;
+                })   
+        }
+        //Atualizar o texto do valor total da página
+        cardTotalValue.textContent = `R$ ${total.toFixed(2)}`;
+         
+        checkoutBtn.addEventListener('click', ()=>{
+            const numeroWhatsApp = '5515996753817';
+            //Montar a mensagem do pedido
+            let mensagem = "Olá, gostaria de fazer o meu pedido:\n";
+            cart.forEach(product =>{
+                mensagem +- `- ${product.name} (R$ ${product.price.toFixed(2)})\n`;
+            });
+            mensagem += `\n*Total: R$ ${total.toFixed(2)}*`;
+
+            const urlWhatsApp = `https://wa.me/${5515996753817}?text=${encodeURIComponent(mensagem)}`;
+            window.open(urlWhatsApp, '_blank');
+            localStorage.removeItem('cart');
+            location.reload(true)
+        })
+    }
+        const limparTabela = document.getElementById('limpar-pedido');
+        limparTabela.addEventListener('click', ()=>{
+        localStorage.removeItem('cart');
+        location.reload(true)
+        })
+})
